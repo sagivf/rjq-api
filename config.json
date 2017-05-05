@@ -1,0 +1,4 @@
+{
+  "db": "JobQueue",
+  "queues": ["a", "b"]
+}
