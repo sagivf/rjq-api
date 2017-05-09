@@ -1,9 +1,9 @@
 const Queue = require('rethinkdb-job-queue')
 const qOptions = {
-  name: 'Mathematics' // The queue and table name
+  name: 'Mathematics'
 }
 const cxnOptions = {
-  db: 'JobQueue', // The name of the database in RethinkDB
+  db: 'JobQueue'
 }
 
 const q = new Queue(cxnOptions, qOptions)
@@ -13,8 +13,11 @@ const job = q.createJob({
   denominator: 456
 })
 
-q.addJob(job).catch((err) => {
+q.addJob(job).then(() => {
+  process.exit()
+}).catch((err) => {
   console.error(err)
+  process.exit()
 })
 
 // q.process((job, next) => {
