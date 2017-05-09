@@ -2,7 +2,7 @@ const assert = require('assert')
 const Queue = require('rethinkdb-job-queue')
 
 module.exports = function (options) {
-  const { db, host, port, user, password } = options
+  const { db, host, port, user, password, ssl } = options
 
   assert(options.queues, 'missing queues definition')
 
@@ -27,6 +27,10 @@ module.exports = function (options) {
     if (password) {
       connection.password = password
     }
+    if (ssl) {
+      connection.ssl = ssl
+    }
+
     return new Queue(connection, {
       name: q
     })
