@@ -2,7 +2,7 @@ const assert = require('assert')
 const Queue = require('rethinkdb-job-queue')
 
 module.exports = function (options) {
-  const db = options.db
+  const { db, host, port } = options
 
   assert(options.queues, 'missing queues definition')
 
@@ -12,10 +12,16 @@ module.exports = function (options) {
     }
 
     assert(db, `failed connecting to ${q} missing db connection`)
-
-    return new Queue({
+    const connection = {
       db: db
-    }, {
+    }
+    if (host) {
+      connection.host = host
+    }
+    if (port) {
+      connection.port = port
+    }
+    return new Queue(connection, {
       name: q
     })
   })
@@ -29,9 +35,14 @@ module.exports = function (options) {
         })
       }))
     },
-    queue (name) {
+    async queue (name) {
       const q = queues.find(({_name}) => _name === name)
-      return q.summary()
+      const data = await q.r.table(name)
+      data.forEach(item => {
+        item.status = item.state
+      })
+
+      return data
     }
   }
 }
