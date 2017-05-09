@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/sagivf/rjq-api.git"
   },
-  "author": "Sagiv Frankel",
+  "author": "Sagiv Frankel <sagivf@gmal.com> (https://sagivf.github.io/)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/sagivf/rjq-api/issues"
