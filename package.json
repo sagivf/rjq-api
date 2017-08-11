@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/sagivf/rjq-api#readme",
   "dependencies": {
-    "rethinkdb-job-queue": "^3.1.0"
+    "rethinkdb-job-queue": "^3.1.0",
+    "rethinkdbdash": "^2.3.31"
   },
   "devDependencies": {
     "standard": "^10.0.2"

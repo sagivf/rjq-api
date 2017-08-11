@@ -1,58 +1,39 @@
-const assert = require('assert')
 const Queue = require('rethinkdb-job-queue')
+const rethinkdbdash = require('rethinkdbdash')
 
-module.exports = function (options) {
-  const { db, host, port, user, password, ssl } = options
+module.exports = function (options = {}) {
+  let { queues, connection = {} } = options
+  connection.db = connection.db || 'JobQueue'
 
-  assert(options.queues, 'missing queues definition')
+  const r = rethinkdbdash(connection)
+  let queuesPromise = queues ? Promise.resolve(queues) : r.tableList()
+  queuesPromise = queuesPromise.then(queues => {
+    return queues.map(q => {
+      if (q instanceof Queue) {
+        return q
+      }
 
-  const queues = options.queues.map(q => {
-    if (q instanceof Queue) {
-      return q
-    }
-
-    assert(db, `failed connecting to ${q} missing db connection`)
-    const connection = {
-      db: db
-    }
-    if (host) {
-      connection.host = host
-    }
-    if (port) {
-      connection.port = port
-    }
-    if (user) {
-      connection.user = user
-    }
-    if (password) {
-      connection.password = password
-    }
-    if (ssl) {
-      connection.ssl = ssl
-    }
-
-    return new Queue(connection, {
-      name: q
+      return new Queue(r, {
+        name: q
+      })
     })
   })
 
   return {
-    queues () {
-      return Promise.all(queues.map(q => {
-        return q.summary().then(summary => {
-          summary.name = q.name
+    async queues () {
+      const queues = await queuesPromise
+      return Promise.all(queues.map(queue => {
+        return queue.summary().then(summary => {
+          summary.name = queue.name
           return summary
         })
       }))
     },
     async queue (name) {
-      const q = queues.find(({_name}) => _name === name)
-      const data = await q.r.table(name)
-      data.forEach(item => {
-        item.status = item.state
-      })
+      const queues = await queuesPromise
 
-      return data
+      const queue = queues.find(({_name}) => _name === name)
+      return queue.r.table(name)
     }
   }
 }
